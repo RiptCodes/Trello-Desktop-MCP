@@ -1,4 +1,8 @@
-# Trello MCP
+# Trello MCP (RiptCodes fork)
+
+> **This is a fork of [kocakli/Trello-Desktop-MCP](https://github.com/kocakli/Trello-Desktop-MCP)**, MIT licensed, with thanks to its author.
+> The fork adds three tools the original could not do: **uploading attachments** and **creating checklists and their items**.
+> See [Added in this fork](#added-in-this-fork). Everything else is the original project.
 
 A Model Context Protocol (MCP) server that provides comprehensive Trello integration for any MCP-compatible client — including Claude Desktop, Claude Code, Gemini CLI, and more. This server enables AI assistants to interact with Trello boards, cards, lists, and more through a secure local connection.
 
@@ -37,7 +41,7 @@ A Model Context Protocol (MCP) server that provides comprehensive Trello integra
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/kocakli/trello-desktop-mcp.git
+   git clone https://github.com/RiptCodes/Trello-Desktop-MCP.git
    cd trello-desktop-mcp
    ```
 
@@ -148,7 +152,7 @@ A Model Context Protocol (MCP) server that provides comprehensive Trello integra
 
 ## Available Tools
 
-The MCP server provides 19 tools organized into three phases:
+The MCP server provides 22 tools: the original 19 in three phases, plus 3 added in this fork.
 
 ### Phase 1: Essential Tools
 - `trello_search` - Universal search across all Trello content
@@ -172,6 +176,15 @@ The MCP server provides 19 tools organized into three phases:
 - `trello_get_board_members` - Get board members
 - `trello_get_board_labels` - Get board labels
 - `trello_get_member` - Get member details
+
+### Added in this fork
+- `trello_add_attachment` - Upload a local file (such as a PNG screenshot) to a card with `filePath`, or attach a web link with `url`. `setCover: true` makes an image the card cover. Files up to 10 MB.
+- `trello_create_checklist` - Create a checklist on a card. Pass `items` (a list of strings) to add them in the same call, in order.
+- `trello_add_checklist_item` - Add one item to an existing checklist, optionally already ticked (`checked: true`).
+
+Examples:
+- "Upload C:\shots\desktop.png to the TC Group card and make it the cover"
+- "Add a Next steps checklist to that card: send first email, follow up in 5 days"
 
 ### Legacy Tools (Backward Compatibility)
 - `list_boards` - List user's boards
@@ -224,7 +237,8 @@ The server implements the Model Context Protocol (MCP), which provides:
 │   │   ├── lists.ts      # List-related tools
 │   │   ├── members.ts    # Member-related tools
 │   │   ├── search.ts     # Search functionality
-│   │   └── advanced.ts   # Advanced features
+│   │   ├── advanced.ts   # Advanced features
+│   │   └── attachments-checklists.ts  # Fork: uploads and checklists
 │   ├── trello/           # Trello API client
 │   │   └── client.ts     # API client with retry logic
 │   ├── types/            # TypeScript type definitions
@@ -246,7 +260,18 @@ npm run type-check
 ```
 
 ### Testing
-The server includes comprehensive error handling and validation. Test your setup by:
+Unit tests (fake `fetch`, no Trello account needed):
+```bash
+npm test
+```
+
+Live test of the fork's tools against the real Trello API. It makes a throwaway board, runs the tools, checks the card, then deletes the board. Needs `TRELLO_API_KEY` and `TRELLO_TOKEN` in your environment:
+```bash
+npm run build
+node scripts/live-test.mjs
+```
+
+You can also test your setup by hand:
 1. Checking your MCP client's connection status
 2. Running a simple command like "Show me my Trello boards"
 3. Verifying the response includes your board data

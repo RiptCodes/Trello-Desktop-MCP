@@ -76,6 +76,15 @@ import {
   handleTrelloGetBoardLabels
 } from './tools/advanced.js';
 
+import {
+  trelloAddAttachmentTool,
+  handleTrelloAddAttachment,
+  trelloCreateChecklistTool,
+  handleTrelloCreateChecklist,
+  trelloAddChecklistItemTool,
+  handleTrelloAddChecklistItem
+} from './tools/attachments-checklists.js';
+
 // Create server instance
 const server = new Server(
   {
@@ -134,7 +143,11 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       trelloGetCardAttachmentsTool,
       trelloGetCardChecklistsTool,
       trelloGetBoardMembersTool,
-      trelloGetBoardLabelsTool
+      trelloGetBoardLabelsTool,
+      // RiptCodes fork: attachments and checklists
+      trelloAddAttachmentTool,
+      trelloCreateChecklistTool,
+      trelloAddChecklistItemTool
     ]
   };
 });
@@ -233,6 +246,19 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       
       case 'trello_get_board_labels':
         result = await handleTrelloGetBoardLabels(argsWithCredentials);
+        break;
+
+      // RiptCodes fork: attachments and checklists
+      case 'trello_add_attachment':
+        result = await handleTrelloAddAttachment(argsWithCredentials);
+        break;
+
+      case 'trello_create_checklist':
+        result = await handleTrelloCreateChecklist(argsWithCredentials);
+        break;
+
+      case 'trello_add_checklist_item':
+        result = await handleTrelloAddChecklistItem(argsWithCredentials);
         break;
         
       default:

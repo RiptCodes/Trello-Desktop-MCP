@@ -9,7 +9,8 @@
     "clean": "rm -rf dist",
     "rebuild": "npm run clean && npm run build",
     "type-check": "tsc --noEmit",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "vitest run"
   },
   "keywords": [
     "mcp",
@@ -27,12 +28,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/yourusername/trello-desktop-mcp.git"
+    "url": "https://github.com/RiptCodes/Trello-Desktop-MCP.git"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/trello-desktop-mcp/issues"
+    "url": "https://github.com/RiptCodes/Trello-Desktop-MCP/issues"
   },
-  "homepage": "https://github.com/yourusername/trello-desktop-mcp#readme",
+  "homepage": "https://github.com/RiptCodes/Trello-Desktop-MCP#readme",
   "engines": {
     "node": ">=18.0.0"
   },
@@ -43,7 +44,8 @@
   "devDependencies": {
     "@types/express": "^5.0.3",
     "@types/node": "^22.10.3",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^3.2.7"
   },
   "files": [
     "dist/**/*",

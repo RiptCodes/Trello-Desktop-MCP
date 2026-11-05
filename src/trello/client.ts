@@ -1,3 +1,5 @@
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
 import { logger } from '../utils/logger.js';
 import { insights } from '../utils/appInsights.js';
 import type { 
@@ -581,6 +583,71 @@ export class TrelloClient {
       `/cards/${cardId}/checklists`,
       { params },
       `Get checklists for card ${cardId}`
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Added in the RiptCodes fork: attachments and checklists.
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Upload a file from this computer to a card.
+   * Trello wants file uploads as "multipart/form-data", not JSON, so we build a
+   * FormData body. We pass `headers: {}` so the JSON Content-Type header that
+   * makeRequest normally adds is dropped: fetch then sets the right multipart
+   * header (with its boundary) by itself.
+   */
+  async uploadAttachment(cardId: string, filePath: string, options: {
+    name?: string;
+    setCover?: boolean;
+  } = {}): Promise<TrelloApiResponse<any>> {
+    const bytes = await readFile(filePath);
+    const fileName = basename(filePath);
+
+    const form = new FormData();
+    form.append('file', new Blob([bytes]), fileName);
+    form.append('name', options.name ?? fileName);
+    if (options.setCover !== undefined) {
+      form.append('setCover', String(options.setCover));
+    }
+
+    return this.makeRequest<any>(
+      `/cards/${cardId}/attachments`,
+      { method: 'POST', body: form, headers: {}, timeout: 60000 },
+      `Upload "${fileName}" to card ${cardId}`
+    );
+  }
+
+  /** Attach a web link (for example a Framer preview) to a card. */
+  async attachUrl(cardId: string, url: string, options: {
+    name?: string;
+    setCover?: boolean;
+  } = {}): Promise<TrelloApiResponse<any>> {
+    return this.makeRequest<any>(
+      `/cards/${cardId}/attachments`,
+      { method: 'POST', body: JSON.stringify({ url, ...options }) },
+      `Attach URL to card ${cardId}`
+    );
+  }
+
+  /** Create an empty checklist on a card. */
+  async createChecklist(cardId: string, name: string, pos?: string | number): Promise<TrelloApiResponse<any>> {
+    return this.makeRequest<any>(
+      `/cards/${cardId}/checklists`,
+      { method: 'POST', body: JSON.stringify(pos === undefined ? { name } : { name, pos }) },
+      `Create checklist "${name}" on card ${cardId}`
+    );
+  }
+
+  /** Add one item to an existing checklist. */
+  async addChecklistItem(checklistId: string, name: string, options: {
+    checked?: boolean;
+    pos?: string | number;
+  } = {}): Promise<TrelloApiResponse<any>> {
+    return this.makeRequest<any>(
+      `/checklists/${checklistId}/checkItems`,
+      { method: 'POST', body: JSON.stringify({ name, ...options }) },
+      `Add item to checklist ${checklistId}`
     );
   }
 }
