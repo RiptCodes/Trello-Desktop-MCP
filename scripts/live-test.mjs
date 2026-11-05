@@ -53,7 +53,11 @@ const PNG = Buffer.from(
 );
 
 const dir = await mkdtemp(join(tmpdir(), 'trello-live-'));
-const board = await trello('POST', '/boards', { name: 'MCP live test (safe to delete)', defaultLists: 'true' });
+// Make the board inside an existing workspace. Without idOrganization, Trello
+// quietly creates a brand-new personal workspace just to hold the board.
+const [workspace] = await trello('GET', '/members/me/organizations', { fields: 'displayName' });
+if (!workspace) throw new Error('This Trello account has no workspace to test in');
+const board = await trello('POST', '/boards', { name: 'MCP live test (safe to delete)', defaultLists: 'true', idOrganization: workspace.id });
 console.log(`made throwaway board ${board.id}`);
 
 let failed = false;
