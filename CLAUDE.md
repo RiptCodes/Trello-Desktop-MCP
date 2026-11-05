@@ -21,7 +21,7 @@ Run `npm test` (vitest, fake fetch) and `npm run type-check`. `node scripts/live
 
 ### Entry Point & Protocol
 
-`src/index.ts` is the MCP server entry point. It reads credentials from env vars, registers 22 tools (19 original + 3 added in the RiptCodes fork), and routes `CallToolRequest` to handler functions via a switch statement. Credentials are automatically injected into every tool handler call. **No console output is allowed** — stdout is reserved for JSON-RPC.
+`src/index.ts` is the MCP server entry point. It reads credentials from env vars, registers 23 tools (19 original + 4 added in the RiptCodes fork), and routes `CallToolRequest` to handler functions via a switch statement. Credentials are automatically injected into every tool handler call. **No console output is allowed** — stdout is reserved for JSON-RPC.
 
 ### Tool Modules
 
@@ -35,7 +35,7 @@ Each file in `src/tools/` exports two things per tool: a **tool definition** (sc
 | `lists.ts` | `trello_get_list_cards`, `trello_create_list`, `trello_add_comment` | List ops & comments |
 | `members.ts` | `trello_get_member` + user boards handler | Member info |
 | `advanced.ts` | Board cards, card actions/attachments/checklists, board members/labels | Extended features |
-| `attachments-checklists.ts` | `trello_add_attachment`, `trello_create_checklist`, `trello_add_checklist_item` | Fork: uploads and checklists (zod schemas live in the same file) |
+| `attachments-checklists.ts` | `trello_add_attachment`, `trello_create_checklist`, `trello_add_checklist_item`, `trello_update_checklist_item` | Fork: uploads and checklists (zod schemas live in the same file) |
 
 ### Trello API Client
 

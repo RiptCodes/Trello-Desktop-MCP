@@ -1,7 +1,7 @@
 # Trello MCP (RiptCodes fork)
 
 > **This is a fork of [kocakli/Trello-Desktop-MCP](https://github.com/kocakli/Trello-Desktop-MCP)**, MIT licensed, with thanks to its author.
-> The fork adds three tools the original could not do: **uploading attachments** and **creating checklists and their items**.
+> The fork adds four tools the original could not do: **uploading attachments**, and **creating checklists, adding items and ticking them**.
 > See [Added in this fork](#added-in-this-fork). Everything else is the original project.
 
 A Model Context Protocol (MCP) server that provides comprehensive Trello integration for any MCP-compatible client — including Claude Desktop, Claude Code, Gemini CLI, and more. This server enables AI assistants to interact with Trello boards, cards, lists, and more through a secure local connection.
@@ -152,7 +152,7 @@ A Model Context Protocol (MCP) server that provides comprehensive Trello integra
 
 ## Available Tools
 
-The MCP server provides 22 tools: the original 19 in three phases, plus 3 added in this fork.
+The MCP server provides 23 tools: the original 19 in three phases, plus 4 added in this fork.
 
 ### Phase 1: Essential Tools
 - `trello_search` - Universal search across all Trello content
@@ -181,6 +181,7 @@ The MCP server provides 22 tools: the original 19 in three phases, plus 3 added 
 - `trello_add_attachment` - Upload a local file (such as a PNG screenshot) to a card with `filePath`, or attach a web link with `url`. `setCover: true` makes an image the card cover. Files up to 10 MB.
 - `trello_create_checklist` - Create a checklist on a card. Pass `items` (a list of strings) to add them in the same call, in order.
 - `trello_add_checklist_item` - Add one item to an existing checklist, optionally already ticked (`checked: true`).
+- `trello_update_checklist_item` - Tick or untick a checklist item (`checked`), or rename it (`name`).
 
 Examples:
 - "Upload C:\shots\desktop.png to the TC Group card and make it the cover"

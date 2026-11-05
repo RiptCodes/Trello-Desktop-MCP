@@ -82,7 +82,9 @@ import {
   trelloCreateChecklistTool,
   handleTrelloCreateChecklist,
   trelloAddChecklistItemTool,
-  handleTrelloAddChecklistItem
+  handleTrelloAddChecklistItem,
+  trelloUpdateChecklistItemTool,
+  handleTrelloUpdateChecklistItem
 } from './tools/attachments-checklists.js';
 
 // Create server instance
@@ -147,7 +149,8 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       // RiptCodes fork: attachments and checklists
       trelloAddAttachmentTool,
       trelloCreateChecklistTool,
-      trelloAddChecklistItemTool
+      trelloAddChecklistItemTool,
+      trelloUpdateChecklistItemTool
     ]
   };
 });
@@ -259,6 +262,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
       case 'trello_add_checklist_item':
         result = await handleTrelloAddChecklistItem(argsWithCredentials);
+        break;
+
+      case 'trello_update_checklist_item':
+        result = await handleTrelloUpdateChecklistItem(argsWithCredentials);
         break;
         
       default:

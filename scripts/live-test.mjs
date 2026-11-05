@@ -13,7 +13,8 @@ import { join } from 'node:path';
 import {
   handleTrelloAddAttachment,
   handleTrelloCreateChecklist,
-  handleTrelloAddChecklistItem
+  handleTrelloAddChecklistItem,
+  handleTrelloUpdateChecklistItem
 } from '../dist/tools/attachments-checklists.js';
 
 const apiKey = process.env.TRELLO_API_KEY;
@@ -75,12 +76,16 @@ try {
   const made = await run('create a checklist with 2 items', handleTrelloCreateChecklist({ ...creds, cardId: card.id, name: 'Next steps', items: ['First', 'Second'] }));
   await run('add a third item, ticked', handleTrelloAddChecklistItem({ ...creds, checklistId: made.checklist.id, name: 'Third', checked: true }));
 
+  // 4. Tick the first item.
+  await run('tick the first item', handleTrelloUpdateChecklistItem({ ...creds, cardId: card.id, checkItemId: made.items[0].id, checked: true }));
+
   // Read the card back from Trello and check everything is really there.
   const back = await trello('GET', `/cards/${card.id}`, { attachments: 'true', checklists: 'all', fields: 'name,idAttachmentCover' });
   check('card has 2 attachments', back.attachments.length === 2);
   check('the PNG is a real upload', back.attachments.some((a) => a.isUpload && a.name === 'desktop-1440.png'));
   check('the PNG is the cover', back.attachments.some((a) => a.id === back.idAttachmentCover && a.isUpload));
   check('checklist items are First, Second, Third', back.checklists[0].checkItems.map((i) => i.name).join() === 'First,Second,Third');
+  check('First is ticked', back.checklists[0].checkItems.find((i) => i.name === 'First').state === 'complete');
   check('Third is ticked', back.checklists[0].checkItems.find((i) => i.name === 'Third').state === 'complete');
   // Note: a card's email address comes back null from the API (Trello only makes
   // it when someone opens "Email to this card" in the website), so we don't use it.

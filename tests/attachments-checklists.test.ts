@@ -9,7 +9,8 @@ import { join } from 'node:path';
 import {
   handleTrelloAddAttachment,
   handleTrelloCreateChecklist,
-  handleTrelloAddChecklistItem
+  handleTrelloAddChecklistItem,
+  handleTrelloUpdateChecklistItem
 } from '../src/tools/attachments-checklists.js';
 
 const CARD = 'a'.repeat(24);
@@ -147,6 +148,29 @@ describe('trello_add_checklist_item', () => {
 
   it('rejects a bad checklist ID without calling Trello', async () => {
     const response = await handleTrelloAddChecklistItem({ ...creds, checklistId: 'not-an-id', name: 'x' });
+
+    expect(response.isError).toBe(true);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+});
+
+describe('trello_update_checklist_item', () => {
+  const ITEM = 'c'.repeat(24);
+
+  it('ticks an item by sending state "complete" to the card checkItem', async () => {
+    replies = [{ id: ITEM, name: 'Send first email', state: 'complete', idChecklist: CHECKLIST }];
+
+    const response = await handleTrelloUpdateChecklistItem({ ...creds, cardId: CARD, checkItemId: ITEM, checked: true });
+
+    const { url, init } = call(0);
+    expect(init.method).toBe('PUT');
+    expect(url.pathname).toBe(`/1/cards/${CARD}/checkItem/${ITEM}`);
+    expect(JSON.parse(init.body as string)).toEqual({ state: 'complete' });
+    expect(resultOf(response).summary).toContain('ticked');
+  });
+
+  it('refuses when there is nothing to change', async () => {
+    const response = await handleTrelloUpdateChecklistItem({ ...creds, cardId: CARD, checkItemId: ITEM });
 
     expect(response.isError).toBe(true);
     expect(fetchMock).not.toHaveBeenCalled();

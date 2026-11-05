@@ -45,6 +45,17 @@ const createChecklistSchema = z.object({
   items: z.array(z.string().min(1).max(16384)).max(100).optional()
 });
 
+const updateChecklistItemSchema = z.object({
+  ...credentials,
+  cardId: trelloId,
+  checkItemId: trelloId,
+  checked: z.boolean().optional(),
+  name: z.string().min(1).max(16384).optional()
+}).refine(
+  (args) => args.checked !== undefined || args.name !== undefined,
+  { message: 'Give checked, name, or both' }
+);
+
 const addChecklistItemSchema = z.object({
   ...credentials,
   checklistId: trelloId,
@@ -215,5 +226,45 @@ export async function handleTrelloAddChecklistItem(args: unknown) {
     });
   } catch (error) {
     return fail('adding checklist item', error);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// 4. trello_update_checklist_item (tick, untick or rename)
+// ---------------------------------------------------------------------------
+
+export const trelloUpdateChecklistItemTool: Tool = {
+  name: 'trello_update_checklist_item',
+  description: 'Tick or untick an item on a Trello checklist (checked: true/false), or rename it. Item IDs come from trello_get_card_checklists.',
+  inputSchema: {
+    type: 'object',
+    properties: {
+      ...credentialProps,
+      cardId: { type: 'string', description: 'ID of the card the checklist is on', pattern: '^[a-f0-9]{24}$' },
+      checkItemId: { type: 'string', description: 'ID of the checklist item', pattern: '^[a-f0-9]{24}$' },
+      checked: { type: 'boolean', description: 'true = ticked, false = not ticked' },
+      name: { type: 'string', description: 'New text for the item' }
+    },
+    required: ['apiKey', 'token', 'cardId', 'checkItemId']
+  }
+};
+
+export async function handleTrelloUpdateChecklistItem(args: unknown) {
+  try {
+    const { apiKey, token, cardId, checkItemId, checked, name } = updateChecklistItemSchema.parse(args);
+    const client = new TrelloClient({ apiKey, token });
+
+    // Trello calls ticked "complete" and unticked "incomplete".
+    const state = checked === undefined ? undefined : checked ? 'complete' as const : 'incomplete' as const;
+    const response = await client.updateChecklistItem(cardId, checkItemId, defined({ state, name }));
+    const item = response.data;
+
+    return ok({
+      summary: `Item "${item.name}" is now ${item.state === 'complete' ? 'ticked' : 'not ticked'}`,
+      item: { id: item.id, name: item.name, state: item.state, idChecklist: item.idChecklist },
+      rateLimit: response.rateLimit
+    });
+  } catch (error) {
+    return fail('updating checklist item', error);
   }
 }

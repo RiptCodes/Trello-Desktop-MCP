@@ -650,4 +650,16 @@ export class TrelloClient {
       `Add item to checklist ${checklistId}`
     );
   }
+
+  /** Tick or untick a checklist item, or rename it. Trello finds items through their card. */
+  async updateChecklistItem(cardId: string, checkItemId: string, updates: {
+    state?: 'complete' | 'incomplete';
+    name?: string;
+  }): Promise<TrelloApiResponse<any>> {
+    return this.makeRequest<any>(
+      `/cards/${cardId}/checkItem/${checkItemId}`,
+      { method: 'PUT', body: JSON.stringify(updates) },
+      `Update checklist item ${checkItemId} on card ${cardId}`
+    );
+  }
 }
